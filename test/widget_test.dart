@@ -1,30 +1,44 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:projek_1/main.dart';
+import 'package:elite_wealth/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App launches and shows Login screen', (WidgetTester tester) async {
+    // Build app
+    await tester.pumpWidget(const EliteWealthApp());
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Pastikan app berhasil di-render
+    expect(find.byType(EliteWealthApp), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Pastikan halaman Login muncul dengan brand name
+    expect(find.text('ELITE WEALTH'), findsWidgets);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Pastikan field email dan password tersedia
+    expect(find.byType(TextFormField), findsWidgets);
+
+    // Pastikan tombol Login tersedia
+    expect(find.text('Login'), findsOneWidget);
+  });
+
+  testWidgets('Login screen has Register link', (WidgetTester tester) async {
+    await tester.pumpWidget(const EliteWealthApp());
+    await tester.pumpAndSettle();
+
+    // Pastikan link ke Register tersedia
+    expect(find.text('Register'), findsOneWidget);
+  });
+
+  testWidgets('Login form shows validation errors when empty', (WidgetTester tester) async {
+    await tester.pumpWidget(const EliteWealthApp());
+    await tester.pumpAndSettle();
+
+    // Tap tombol Login tanpa mengisi form
+    await tester.tap(find.text('Login'));
+    await tester.pumpAndSettle();
+
+    // Validasi error muncul
+    expect(find.text('Email wajib diisi'), findsOneWidget);
+    expect(find.text('Password wajib diisi'), findsOneWidget);
   });
 }
