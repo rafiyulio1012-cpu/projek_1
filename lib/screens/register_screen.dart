@@ -105,7 +105,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                     const SizedBox(height: 60),
 
                     // ── Brand ──────────────────────
-                    const Text('ELITE WEALTH', style: AppTheme.brandTitle),
+                    const Text('DAILY REPORT', style: AppTheme.brandTitle),
                     const SizedBox(height: 8),
                     const Text(
                       'Create Account',

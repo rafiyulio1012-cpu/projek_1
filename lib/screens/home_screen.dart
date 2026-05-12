@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../models/models.dart';
 import 'add_entry_dialog.dart';
 import 'profile_screen.dart';
+import 'login_screen.dart'; // ✅ TAMBAHAN: import untuk logout
 
 class HomeScreen extends StatefulWidget {
   final UserModel user;
@@ -47,6 +48,20 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _transactions.removeWhere((t) => t.id == id));
   }
 
+  // ✅ FIX: Fungsi logout yang benar — navigasi ke LoginScreen
+  void _doLogout() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const LoginScreen(),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,11 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
           _VaultTab(transactions: _transactions, usd: _usd),
           ProfileScreen(
             user: widget.user,
-            onUserUpdated: () => setState(() {}),
+            onUserUpdated: () => setState(() {}), // ✅ rebuild saat profil diupdate
           ),
         ],
       ),
-      // ── BottomAppBar dengan notch untuk FAB ──
       bottomNavigationBar: _buildBottomNav(),
       floatingActionButton: _buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -86,8 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildFAB() {
-    // Selalu tampil, tapi hanya aktif (gold) di tab Portfolio
-    // Di tab lain tetap muncul agar layout navbar tidak bergeser
     final bool isPortfolio = _currentTab == 0;
     return SizedBox(
       width: 62,
@@ -132,8 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNav() {
-    // 4 item: [Portfolio] [Analysis] [+slot] [Vault] [Settings]
-    // Gunakan BottomAppBar dengan notch agar FAB benar-benar center
     return BottomAppBar(
       color: AppTheme.bgCard,
       surfaceTintColor: Colors.transparent,
@@ -148,14 +158,11 @@ class _HomeScreenState extends State<HomeScreen> {
         height: 64,
         child: Row(
           children: [
-            // Kiri: Portfolio & Analysis
-            Expanded(child: _navItem(Icons.wallet_outlined, Icons.wallet_rounded, 'Home', 0)),
+            Expanded(child: _navItem(Icons.home, Icons.home, 'Home', 0)),
             Expanded(child: _navItem(Icons.show_chart_outlined, Icons.show_chart_rounded, 'Analysis', 1)),
-            // Ruang kosong untuk FAB di tengah
             const SizedBox(width: 72),
-            // Kanan: Vault & Settings
             Expanded(child: _navItem(Icons.lock_outline_rounded, Icons.lock_rounded, 'Vault', 2)),
-            Expanded(child: _navItem(Icons.settings_outlined, Icons.settings_rounded, 'Settings', 3)),
+            Expanded(child: _navItem(Icons.person_2, Icons.person_2, 'Profile', 3)),
           ],
         ),
       ),
@@ -189,6 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ✅ REVISI LENGKAP: Drawer menampilkan username + email dari input login/register
   Widget _buildDrawer() {
     return Drawer(
       backgroundColor: AppTheme.bgCard,
@@ -196,27 +204,103 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             const SizedBox(height: 24),
-            const Text('ELITE WEALTH', style: AppTheme.brandTitleSmall),
-            const SizedBox(height: 8),
-            Text(
-              widget.user.fullName,
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+
+            // Brand title
+            const Text('DAILY REPORT', style: AppTheme.brandTitleSmall),
+            const SizedBox(height: 16),
+
+            // ✅ Avatar
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.gold, width: 2),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF2A2510), Color(0xFF1A1A1A)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: const Icon(
+                Icons.person_rounded,
+                color: AppTheme.gold,
+                size: 34,
+              ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
+
+            // ✅ Nama user dari input (fullName)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                widget.user.fullName,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // ✅ Email user dari input
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                widget.user.email,
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // ✅ Username user dari input
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                '@${widget.user.username}',
+                style: const TextStyle(
+                  color: AppTheme.gold,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            const SizedBox(height: 20),
             const Divider(color: AppTheme.border),
-            _drawerItem(Icons.wallet_rounded, 'Portfolio', 0),
+
+            // Menu items
+            _drawerItem(Icons.home, 'Home', 0),
             _drawerItem(Icons.show_chart_rounded, 'Analysis', 1),
             _drawerItem(Icons.lock_rounded, 'Vault', 2),
-            _drawerItem(Icons.settings_rounded, 'Settings', 3),
+            _drawerItem(Icons.person, 'Profile', 3),
+
             const Spacer(),
             const Divider(color: AppTheme.border),
+
+            // ✅ FIX: Logout benar-benar navigasi ke LoginScreen
             ListTile(
               leading: const Icon(Icons.logout_rounded, color: AppTheme.danger),
-              title: const Text('Log Out',
-                  style: TextStyle(color: AppTheme.danger, fontWeight: FontWeight.w600)),
+              title: const Text(
+                'Log Out',
+                style: TextStyle(
+                  color: AppTheme.danger,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               onTap: () {
-                Navigator.pop(context);
-                setState(() => _currentTab = 3);
+                Navigator.pop(context); // tutup drawer terlebih dahulu
+                _doLogout();           // lalu navigasi ke login
               },
             ),
             const SizedBox(height: 16),
@@ -238,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
           fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
         ),
       ),
-      tileColor: isActive ? AppTheme.gold.withOpacity(0.05) : null,
+      tileColor: isActive ? AppTheme.gold.withValues(alpha: .05) : null,
       onTap: () {
         Navigator.pop(context);
         setState(() => _currentTab = index);
@@ -284,7 +368,7 @@ class _PortfolioTab extends StatelessWidget {
               onPressed: () => Scaffold.of(ctx).openDrawer(),
             ),
           ),
-          title: const Text('ELITE WEALTH', style: AppTheme.brandTitleSmall),
+          title: const Text('DAILY REPORT', style: AppTheme.brandTitleSmall),
           centerTitle: true,
         ),
 
@@ -459,7 +543,7 @@ class _PortfolioTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: .12),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 16),
@@ -510,7 +594,7 @@ class _PortfolioTab extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: .12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -624,7 +708,6 @@ class _AnalysisTab extends StatelessWidget {
         ? totalIncome / (totalIncome + totalExpense)
         : 0.0;
 
-    // Group by classification
     final Map<String, double> byClass = {};
     for (final tx in transactions) {
       byClass[tx.classification] =
@@ -643,7 +726,7 @@ class _AnalysisTab extends StatelessWidget {
               onPressed: () => Scaffold.of(ctx).openDrawer(),
             ),
           ),
-          title: const Text('ELITE WEALTH', style: AppTheme.brandTitleSmall),
+          title: const Text('DAILY REPORT', style: AppTheme.brandTitleSmall),
           centerTitle: true,
         ),
         SliverToBoxAdapter(
@@ -757,10 +840,9 @@ class _AnalysisTab extends StatelessWidget {
                     const Text('BY CLASSIFICATION', style: AppTheme.labelStyle),
                     const SizedBox(height: 12),
                     ...byClass.entries.map((e) {
-                      final pct =
-                          (totalIncome + totalExpense) > 0
-                              ? e.value / (totalIncome + totalExpense)
-                              : 0.0;
+                      final pct = (totalIncome + totalExpense) > 0
+                          ? e.value / (totalIncome + totalExpense)
+                          : 0.0;
                       return Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(14),
@@ -852,7 +934,7 @@ class _VaultTab extends StatelessWidget {
               onPressed: () => Scaffold.of(ctx).openDrawer(),
             ),
           ),
-          title: const Text('ELITE WEALTH', style: AppTheme.brandTitleSmall),
+          title: const Text('DAILY REPORT', style: AppTheme.brandTitleSmall),
           centerTitle: true,
         ),
         SliverToBoxAdapter(
@@ -894,7 +976,7 @@ class _VaultTab extends StatelessWidget {
                             width: 42,
                             height: 42,
                             decoration: BoxDecoration(
-                              color: color.withOpacity(0.12),
+                              color: color.withValues(alpha: .12),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(

@@ -14,6 +14,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
+  final _usernameCtrl = TextEditingController(); // Tambahan Controller Username
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscurePass = true;
@@ -40,6 +41,7 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void dispose() {
     _animCtrl.dispose();
+    _usernameCtrl.dispose(); // Dispose Controller
     _emailCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
@@ -52,11 +54,12 @@ class _LoginScreenState extends State<LoginScreen>
     if (!mounted) return;
     setState(() => _isLoading = false);
 
+    // Mengambil data dinamis dari inputan form
     final user = UserModel(
-      fullName: 'Alexander Sterling',
+      fullName: _usernameCtrl.text.trim(), // Menggunakan username sebagai Full Name sementara
       email: _emailCtrl.text.trim(),
-      username: 'asterling_elite',
-      phone: '+1 (555) 019-8273',
+      username: _usernameCtrl.text.trim(),
+      phone: '+62 (555) 019-8273', // Default
       password: _passCtrl.text,
     );
 
@@ -90,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen>
                     const SizedBox(height: 80),
 
                     // ── Brand ──────────────────────
-                    const Text('ELITE WEALTH', style: AppTheme.brandTitle),
+                    const Text('DAILY REPORT', style: AppTheme.brandTitle),
                     const SizedBox(height: 8),
                     const Text(
                       'Secure Access Portal',
@@ -110,6 +113,29 @@ class _LoginScreenState extends State<LoginScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Username (TAMBAHAN BARU)
+                          const Text('USERNAME', style: AppTheme.labelStyle),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _usernameCtrl,
+                            style: const TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontSize: 14,
+                            ),
+                            decoration: AppTheme.inputDecoration(
+                              hint: 'asterling_elite',
+                              prefixIcon: Icons.person_outline_rounded,
+                            ),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Username wajib diisi';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 24),
+
                           // Email
                           const Text('EMAIL ADDRESS', style: AppTheme.labelStyle),
                           const SizedBox(height: 8),

@@ -29,7 +29,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _usernameCtrl = TextEditingController(text: widget.user.username);
     _emailCtrl = TextEditingController(text: widget.user.email);
-    _phoneCtrl = TextEditingController(text: widget.user.phone.isEmpty ? '+1 (555) 000-0000' : widget.user.phone);
+    _phoneCtrl = TextEditingController(
+        text: widget.user.phone.isEmpty ? '+62 (555) 000-0000' : widget.user.phone);
   }
 
   @override
@@ -47,6 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       switch (field) {
         case 'username':
           widget.user.username = _usernameCtrl.text.trim();
+          widget.user.fullName = _usernameCtrl.text.trim();
           _editingUsername = false;
           break;
         case 'email':
@@ -111,8 +113,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
             child: const Text('Log Out',
-                style: TextStyle(color: AppTheme.danger,
-                    fontWeight: FontWeight.w700)),
+                style: TextStyle(
+                    color: AppTheme.danger, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -121,9 +123,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.bgPrimary,
-      body: CustomScrollView(
+    // 💡 REVISI: Mengganti Scaffold menjadi Material.
+    // Karena ProfileScreen berada di dalam IndexedStack (home_screen.dart),
+    // kita tidak butuh Scaffold dan Drawer baru. Kita meminjam milik home_screen!
+    return Material(
+      color: AppTheme.bgPrimary,
+      child: CustomScrollView(
         slivers: [
           // ── App Bar ────────────────────────────
           SliverAppBar(
@@ -133,10 +138,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             leading: Builder(
               builder: (ctx) => IconButton(
                 icon: const Icon(Icons.menu, color: AppTheme.textSecondary),
+                // Tombol ini sekarang otomatis akan membuka Drawer dari home_screen.dart
                 onPressed: () => Scaffold.of(ctx).openDrawer(),
               ),
             ),
-            title: const Text('ELITE WEALTH', style: AppTheme.brandTitleSmall),
+            title: const Text('DAILY REPORT', style: AppTheme.brandTitleSmall),
             centerTitle: true,
           ),
 
@@ -248,7 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: const Icon(Icons.logout_rounded,
                           color: AppTheme.danger, size: 18),
                       label: const Text(
-                        'LOG OUT SECURELY',
+                        'LOG OUT',
                         style: TextStyle(
                           color: AppTheme.danger,
                           fontSize: 13,
@@ -265,7 +271,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 100), // Memberi jarak tambahan untuk Bottom NavBar
                 ],
               ),
             ),
